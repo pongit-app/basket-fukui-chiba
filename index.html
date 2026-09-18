@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>福井・千葉J 観戦カレンダー 2026-27</title>
+<meta name="theme-color" content="#f5f3f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="福井・千葉J">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.png">
+<link rel="manifest" href="manifest.json">
+<style>
+/* 既定はライト。ヘッダーのボタンでダークに切替（localStorageに保存） */
+:root{
+ --bg:#f5f3f6; --panel:#ffffff; --panel2:#efe9f2; --line:#e0dbe6;
+ --fg:#1d1a22; --dim:#6c6577; --accent:#c2410c;
+ --hdr:rgba(245,243,246,.94);
+ --nextbg:linear-gradient(135deg,#fdf6ef,#f3ecf6); --nextln:#e3d5e9;
+ --sat:#1668c8; --sun:#cf3b3b;
+ --hbg:rgba(26,127,55,.13); --hfg:#15803d;
+ --abg:rgba(108,101,119,.12); --afg:#5c5668;
+ --tv:#2563c4; --nt:#15803d;
+ --sh:0 1px 2px rgba(29,26,34,.06);
+ --pre:#7c3aed; --prebg:#faf7ff; --nbg:rgba(124,58,237,.12); --nfg:#6d28d9;
+ --goc:#d97706; --gobg:#fffaf0; --wc:#15803d; --lc:#c2410c;
+}
+:root[data-theme="dark"]{
+ --bg:#0e1116; --panel:#161b22; --panel2:#1c2230; --line:#2a3240;
+ --fg:#e6edf3; --dim:#8b98a8; --accent:#ff7a1a;
+ --hdr:rgba(14,17,22,.94);
+ --nextbg:linear-gradient(135deg,#1d2634,#161b22); --nextln:#33405a;
+ --sat:#4aa3ff; --sun:#ff6b6b;
+ --hbg:rgba(46,160,67,.18); --hfg:#4ac26b;
+ --abg:rgba(125,135,148,.16); --afg:#9aa5b4;
+ --tv:#7fb3ff; --nt:#4ac26b;
+ --sh:none;
+ --pre:#b794f6; --prebg:#1a1826; --nbg:rgba(183,148,246,.16); --nfg:#b794f6;
+ --goc:#fbbf24; --gobg:#241d10; --wc:#4ac26b; --lc:#ff8a5c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+ font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+ -webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:10;background:var(--hdr);
+ backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+ padding-top:env(safe-area-inset-top)}
+.wrap{max-width:760px;margin:0 auto;
+ padding:0 calc(12px + env(safe-area-inset-left)) 0 calc(12px + env(safe-area-inset-right))}
+.hrow{display:flex;align-items:center;gap:8px}
+h1{font-size:17px;margin:0;padding:12px 0 8px;letter-spacing:.02em;flex:1;min-width:0}
+h1 span{color:var(--dim);font-size:12px;font-weight:400;margin-left:6px;white-space:nowrap}
+#theme{flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+ background:var(--panel);color:var(--fg);font-size:15px;line-height:1;cursor:pointer;
+ display:flex;align-items:center;justify-content:center;box-shadow:var(--sh)}
+@media (max-width:430px){
+ h1{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ h1 span{font-size:10px;margin-left:5px}
+}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:7px 13px;border-radius:999px;border:1px solid var(--line);
+ background:var(--panel);color:var(--dim);font-size:13px;cursor:pointer;white-space:nowrap;
+ box-shadow:var(--sh)}
+.tab.on{background:var(--tc,#333);border-color:var(--tc,#333);color:#fff;font-weight:600}
+.filters{display:flex;gap:6px;padding:0 0 10px;flex-wrap:wrap;align-items:center}
+.chip{padding:5px 11px;border-radius:6px;border:1px solid var(--line);background:var(--panel);
+ color:var(--dim);font-size:12px;cursor:pointer;box-shadow:var(--sh)}
+.chip.on{background:var(--panel2);color:var(--fg);border-color:var(--accent)}
+.count{margin-left:auto;font-size:12px;color:var(--dim)}
+main{max-width:760px;margin:0 auto;
+ padding:14px calc(12px + env(safe-area-inset-right)) calc(60px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
+.next{background:var(--nextbg);border:1px solid var(--nextln);
+ border-radius:12px;padding:13px 14px;margin-bottom:18px;box-shadow:var(--sh)}
+.next .lb{font-size:11px;color:var(--accent);letter-spacing:.1em;font-weight:700}
+.next .mn{font-size:16px;font-weight:700;margin-top:5px}
+.next .sb{font-size:12px;color:var(--dim);margin-top:4px}
+.mon{font-size:12px;color:var(--dim);font-weight:700;letter-spacing:.08em;
+ margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.mon:first-child{margin-top:0}
+.g{display:flex;gap:11px;align-items:center;padding:9px 10px;border-radius:9px;
+ background:var(--panel);border:1px solid transparent;margin-bottom:5px;box-shadow:var(--sh)}
+.g.past{opacity:.82}
+.g.soon{border-color:var(--accent);background:var(--panel2)}
+.dt{flex:0 0 50px;text-align:center;line-height:1.15}
+.dt b{display:block;font-size:17px;font-weight:700}
+.dt i{font-style:normal;font-size:10px;color:var(--dim)}
+.dt.sat b{color:var(--sat)} .dt.sun b{color:var(--sun)}
+.mid{flex:1;min-width:0}
+.mid .op{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mid .vn{font-size:11px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt{flex:0 0 auto;text-align:right}
+.ha{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.ha.H{background:var(--hbg);color:var(--hfg)}
+.ha.A{background:var(--abg);color:var(--afg)}
+.tm{font-size:12px;color:var(--dim);margin-top:3px}
+.jp .cat{font-size:10px;color:var(--accent);font-weight:700;margin-bottom:2px}
+.pre{font-size:10px;font-weight:700;margin-bottom:2px;color:var(--pre)}
+.g.pregame{background:var(--prebg)}
+.ha.N{background:var(--nbg);color:var(--nfg)}
+.sc{font-size:13px;font-weight:700;margin-top:3px;white-space:nowrap}
+.sc.W{color:var(--wc)} .sc.L{color:var(--lc)} .sc.D{color:var(--dim)}
+.sc small{font-weight:600;font-size:10px;opacity:.9;margin-left:1px}
+.rec{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;
+ font-size:12px;color:var(--dim);margin:-8px 0 16px;padding:9px 12px;
+ background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:var(--sh)}
+.rec b{font-size:14px;color:var(--fg)}
+.rec .lb{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--accent)}
+.go{flex:0 0 auto;width:34px;height:34px;margin-left:2px;border:0;background:none;
+ color:var(--dim);font-size:19px;line-height:1;cursor:pointer;border-radius:50%;
+ display:flex;align-items:center;justify-content:center;padding:0}
+.go.on{color:var(--goc)}
+.g.going{border-color:var(--goc);background:var(--gobg)}
+.g.going .dt b{color:var(--goc)}
+.jp .tv{font-size:11px;color:var(--tv);margin-top:2px}
+.jp .nt{font-size:11px;color:var(--nt);margin-top:2px}
+.note{font-size:11px;color:var(--dim);line-height:1.7;margin-top:26px;
+ padding-top:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="hrow"><h1>バスケ観戦カレンダー<span>2026-27 千葉J / 福井 / 日本代表</span></h1><button id="theme" type="button" aria-label="表示テーマを切り替え">🌙</button></div>
+<div class="tabs" id="tabs"></div>
+<div class="filters" id="filters">
+  <span class="chip on" data-f="all">全試合</span>
+  <span class="chip" data-f="HOME">ホーム</span>
+  <span class="chip" data-f="AWAY">アウェー</span>
+  <span class="chip" data-f="future">これから</span>
+  <span class="chip" data-f="pre">プレ</span>
+  <span class="chip" data-f="going">★行く</span>
+  <span class="count" id="count"></span>
+</div>
+</div></header>
+<main id="main"></main>
+<script>
+const DATA={"千葉ジェッツ": {"short": "千葉J", "color": "#d7141a", "games": [{"d": "2026-08-22", "w": "土", "opp": "神戸", "ha": "AWAY", "pref": "兵庫県", "arena": "GLION ARENA KOBE", "t": "14:00", "id": "", "k": "pre", "ev": "KOBE RISING", "sc": "100-95", "r": "W", "rn": ""}, {"d": "2026-08-30", "w": "日", "opp": "川崎", "ha": "AWAY", "pref": "神奈川県", "arena": "とどろきアリーナ", "t": "15:00", "id": "", "k": "pre", "ev": "", "sc": "105-105", "r": "D", "rn": ""}, {"d": "2026-09-05", "w": "土", "opp": "信州", "ha": "AWAY", "pref": "長野県", "arena": "軽井沢風越公園総合体育館", "t": "14:05", "id": "", "k": "pre", "ev": "", "sc": "105-99", "r": "W", "rn": ""}, {"d": "2026-09-07", "w": "月", "opp": "琉球", "ha": "AWAY", "pref": "沖縄県", "arena": "沖縄サントリーアリーナ", "t": "19:35", "id": "", "k": "pre", "ev": "ISLAND GAMES", "sc": "86-110", "r": "L", "rn": ""}, {"d": "2026-09-08", "w": "火", "opp": "パース・ワイルドキャッツ", "ha": "中立", "pref": "沖縄県", "arena": "沖縄サントリーアリーナ", "t": "19:35", "id": "", "k": "pre", "ev": "ISLAND GAMES・8分×4Q", "sc": "", "r": "", "rn": ""}, {"d": "2026-09-12", "w": "土", "opp": "長崎", "ha": "HOME", "pref": "千葉県", "arena": "LaLa arena TOKYO-BAY", "t": "14:10", "id": "", "k": "pre", "ev": "ちばぎんPRESEASON・8分×4Q", "sc": "60-86", "r": "L", "rn": ""}, {"d": "2026-09-13", "w": "日", "opp": "A千葉", "ha": "HOME", "pref": "千葉県", "arena": "LaLa arena TOKYO-BAY", "t": "14:10", "id": "", "k": "pre", "ev": "ちばぎんPRESEASON・8分×4Q", "sc": "73-79", "r": "L", "rn": ""}, {"d": "2026-09-25", "w": "金", "opp": "東京SR", "ha": "AWAY", "pref": "東京都", "arena": "トヨタA", "t": "19:05", "id": "506382", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-09-26", "w": "土", "opp": "東京SR", "ha": "AWAY", "pref": "東京都", "arena": "トヨタA", "t": "16:05", "id": "506390", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-02", "w": "金", "opp": "A東京", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506406", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-04", "w": "日", "opp": "A東京", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "14:05", "id": "506421", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-08", "w": "木", "opp": "神戸", "ha": "AWAY", "pref": "兵庫県", "arena": "Gアリ", "t": "19:05", "id": "506439", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-10", "w": "土", "opp": "北海道", "ha": "AWAY", "pref": "北海道", "arena": "北海きた", "t": "14:05", "id": "506447", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-12", "w": "月", "opp": "横浜BC", "ha": "AWAY", "pref": "神奈川県", "arena": "横浜BT", "t": "15:05", "id": "506459", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-17", "w": "土", "opp": "島根", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "13:05", "id": "506471", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-19", "w": "月", "opp": "東京SR", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506479", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-21", "w": "水", "opp": "京都", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506488", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-25", "w": "日", "opp": "大阪", "ha": "AWAY", "pref": "大阪府", "arena": "おおきに", "t": "16:05", "id": "506509", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-31", "w": "土", "opp": "富山", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "14:05", "id": "506525", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-01", "w": "日", "opp": "富山", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "14:05", "id": "506536", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-06", "w": "金", "opp": "A千葉", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506547", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-08", "w": "日", "opp": "佐賀", "ha": "AWAY", "pref": "佐賀県", "arena": "Sアリ", "t": "17:05", "id": "506559", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-10", "w": "火", "opp": "大阪", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506566", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-12", "w": "木", "opp": "滋賀", "ha": "AWAY", "pref": "滋賀県", "arena": "滋賀DH", "t": "19:05", "id": "506577", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-14", "w": "土", "opp": "長崎", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "13:00", "id": "506586", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-16", "w": "月", "opp": "三遠", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506596", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-18", "w": "水", "opp": "秋田", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506605", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-05", "w": "土", "opp": "茨城", "ha": "HOME", "pref": "千葉県", "arena": "船アリ", "t": "15:05", "id": "506619", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-07", "w": "月", "opp": "信州", "ha": "AWAY", "pref": "長野県", "arena": "ホワイト", "t": "19:05", "id": "506630", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-12", "w": "土", "opp": "秋田", "ha": "AWAY", "pref": "秋田県", "arena": "CNA", "t": "14:05", "id": "506638", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-13", "w": "日", "opp": "秋田", "ha": "AWAY", "pref": "秋田県", "arena": "CNA", "t": "14:05", "id": "506646", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-16", "w": "水", "opp": "名古屋D", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506660", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-18", "w": "金", "opp": "横浜BC", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "19:05", "id": "506672", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-20", "w": "日", "opp": "横浜BC", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "14:05", "id": "506689", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-26", "w": "土", "opp": "川崎", "ha": "AWAY", "pref": "神奈川県", "arena": "とどろき", "t": "17:05", "id": "506702", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-27", "w": "日", "opp": "川崎", "ha": "AWAY", "pref": "神奈川県", "arena": "とどろき", "t": "15:05", "id": "506715", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-02", "w": "土", "opp": "琉球", "ha": "AWAY", "pref": "沖縄県", "arena": "沖アリ", "t": "14:05", "id": "506742", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-03", "w": "日", "opp": "琉球", "ha": "AWAY", "pref": "沖縄県", "arena": "沖アリ", "t": "14:05", "id": "506755", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-25", "w": "月", "opp": "川崎", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506774", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-27", "w": "水", "opp": "長崎", "ha": "AWAY", "pref": "長崎県", "arena": "ハピアリ", "t": "", "id": "506790", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-30", "w": "土", "opp": "広島", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506797", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-31", "w": "日", "opp": "広島", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506808", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-03", "w": "水", "opp": "仙台", "ha": "AWAY", "pref": "宮城県", "arena": "ゼビオ", "t": "", "id": "506817", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-05", "w": "金", "opp": "茨城", "ha": "AWAY", "pref": "茨城県", "arena": "ADみと", "t": "", "id": "506828", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-07", "w": "日", "opp": "茨城", "ha": "AWAY", "pref": "茨城県", "arena": "ADみと", "t": "", "id": "506842", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-10", "w": "水", "opp": "佐賀", "ha": "AWAY", "pref": "佐賀県", "arena": "Sアリ", "t": "", "id": "506856", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-12", "w": "金", "opp": "京都", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506867", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-14", "w": "日", "opp": "神戸", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506877", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-17", "w": "水", "opp": "島根", "ha": "AWAY", "pref": "島根県", "arena": "BNアリ", "t": "", "id": "506898", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-05", "w": "金", "opp": "宇都宮", "ha": "AWAY", "pref": "栃木県", "arena": "日環栃木", "t": "", "id": "506901", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-07", "w": "日", "opp": "宇都宮", "ha": "AWAY", "pref": "栃木県", "arena": "日環栃木", "t": "", "id": "506916", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-10", "w": "水", "opp": "滋賀", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506930", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-12", "w": "金", "opp": "A千葉", "ha": "AWAY", "pref": "千葉県", "arena": "千葉PA", "t": "", "id": "506940", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-14", "w": "日", "opp": "A千葉", "ha": "AWAY", "pref": "千葉県", "arena": "千葉PA", "t": "", "id": "506954", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-20", "w": "土", "opp": "群馬", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506979", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-21", "w": "日", "opp": "群馬", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "506990", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-03", "w": "土", "opp": "三河", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "507027", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-05", "w": "月", "opp": "A東京", "ha": "AWAY", "pref": "東京都", "arena": "トヨタA", "t": "", "id": "507034", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-07", "w": "水", "opp": "富山", "ha": "AWAY", "pref": "富山県", "arena": "APアリ", "t": "", "id": "507047", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-10", "w": "土", "opp": "北海道", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "507059", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-11", "w": "日", "opp": "北海道", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "507068", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-13", "w": "火", "opp": "三遠", "ha": "AWAY", "pref": "愛知県", "arena": "豊橋", "t": "", "id": "507081", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-21", "w": "水", "opp": "宇都宮", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "507099", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-24", "w": "土", "opp": "仙台", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "507107", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-25", "w": "日", "opp": "仙台", "ha": "HOME", "pref": "千葉県", "arena": "ららアリ", "t": "", "id": "507117", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-30", "w": "金", "opp": "信州", "ha": "AWAY", "pref": "長野県", "arena": "ホワイト", "t": "", "id": "507143", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-05-02", "w": "日", "opp": "群馬", "ha": "AWAY", "pref": "群馬県", "arena": "オプアリ", "t": "", "id": "507151", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}]}, "福井ブローウィンズ": {"short": "福井", "color": "#1f3f9e", "games": [{"d": "2026-08-29", "w": "土", "opp": "滋賀", "ha": "AWAY", "pref": "滋賀県", "arena": "プロシードアリーナHIKONE", "t": "14:05", "id": "", "k": "pre", "ev": "SHIGA湖北キャンプ", "sc": "90-104", "r": "L", "rn": ""}, {"d": "2026-09-05", "w": "土", "opp": "京都", "ha": "HOME", "pref": "福井県", "arena": "セーレン・ドリームアリーナ", "t": "14:05", "id": "", "k": "pre", "ev": "", "sc": "72-100", "r": "L", "rn": ""}, {"d": "2026-09-06", "w": "日", "opp": "富山", "ha": "HOME", "pref": "福井県", "arena": "セーレン・ドリームアリーナ", "t": "14:05", "id": "", "k": "pre", "ev": "", "sc": "95-77", "r": "W", "rn": ""}, {"d": "2026-09-13", "w": "日", "opp": "熊本", "ha": "AWAY", "pref": "熊本県", "arena": "熊本県立総合体育館", "t": "", "id": "", "k": "pre", "ev": "熊本地震復興支援マッチ", "sc": "57-78", "r": "L", "rn": ""}, {"d": "2026-09-26", "w": "土", "opp": "岐阜", "ha": "AWAY", "pref": "岐阜県", "arena": "OKB", "t": "14:05", "id": "507167", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-09-27", "w": "日", "opp": "岐阜", "ha": "AWAY", "pref": "岐阜県", "arena": "OKB", "t": "14:05", "id": "507168", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-03", "w": "土", "opp": "金沢", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "15:05", "id": "507197", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-04", "w": "日", "opp": "金沢", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "14:05", "id": "507198", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-10", "w": "土", "opp": "横浜EX", "ha": "AWAY", "pref": "神奈川県", "arena": "横浜武道", "t": "17:35", "id": "507217", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-11", "w": "日", "opp": "横浜EX", "ha": "AWAY", "pref": "神奈川県", "arena": "横浜武道", "t": "15:05", "id": "507218", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-14", "w": "水", "opp": "山形", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "19:05", "id": "507235", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-17", "w": "土", "opp": "新潟", "ha": "AWAY", "pref": "新潟県", "arena": "アオーレ", "t": "14:05", "id": "507253", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-18", "w": "日", "opp": "新潟", "ha": "AWAY", "pref": "新潟県", "arena": "アオーレ", "t": "14:05", "id": "507254", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-24", "w": "土", "opp": "埼玉", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "15:05", "id": "507277", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-25", "w": "日", "opp": "埼玉", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "14:05", "id": "507278", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-10-31", "w": "土", "opp": "岐阜", "ha": "AWAY", "pref": "岐阜県", "arena": "高山", "t": "14:05", "id": "507305", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-01", "w": "日", "opp": "岐阜", "ha": "AWAY", "pref": "岐阜県", "arena": "高山", "t": "14:05", "id": "507306", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-04", "w": "水", "opp": "鹿児島", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "19:05", "id": "507318", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-07", "w": "土", "opp": "岡山", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "15:05", "id": "507333", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-08", "w": "日", "opp": "岡山", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "14:05", "id": "507334", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-21", "w": "土", "opp": "新潟", "ha": "HOME", "pref": "福井県", "arena": "敦賀総合", "t": "15:05", "id": "507381", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-22", "w": "日", "opp": "新潟", "ha": "HOME", "pref": "福井県", "arena": "敦賀総合", "t": "14:05", "id": "507382", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-28", "w": "土", "opp": "静岡", "ha": "AWAY", "pref": "静岡県", "arena": "このはな", "t": "14:05", "id": "507405", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-11-29", "w": "日", "opp": "静岡", "ha": "AWAY", "pref": "静岡県", "arena": "このはな", "t": "14:05", "id": "507406", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-05", "w": "土", "opp": "横浜EX", "ha": "HOME", "pref": "福井県", "arena": "アイシン", "t": "15:05", "id": "507429", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-06", "w": "日", "opp": "横浜EX", "ha": "HOME", "pref": "福井県", "arena": "アイシン", "t": "14:05", "id": "507430", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-09", "w": "水", "opp": "山形", "ha": "AWAY", "pref": "山形県", "arena": "山形県総", "t": "19:05", "id": "507442", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-14", "w": "月", "opp": "東京U", "ha": "AWAY", "pref": "東京都", "arena": "代々木２", "t": "19:05", "id": "507459", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2026-12-15", "w": "火", "opp": "東京U", "ha": "AWAY", "pref": "東京都", "arena": "代々木２", "t": "19:05", "id": "507460", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-20", "w": "水", "opp": "鹿児島", "ha": "AWAY", "pref": "鹿児島県", "arena": "鹿児体", "t": "", "id": "507532", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-23", "w": "土", "opp": "新潟", "ha": "AWAY", "pref": "新潟県", "arena": "アオーレ", "t": "", "id": "507545", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-24", "w": "日", "opp": "新潟", "ha": "AWAY", "pref": "新潟県", "arena": "アオーレ", "t": "", "id": "507546", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-30", "w": "土", "opp": "横浜EX", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507569", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-01-31", "w": "日", "opp": "横浜EX", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507570", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-03", "w": "水", "opp": "八王子", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507587", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-06", "w": "土", "opp": "金沢", "ha": "AWAY", "pref": "石川県", "arena": "いしかわ", "t": "", "id": "507603", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-07", "w": "日", "opp": "金沢", "ha": "AWAY", "pref": "石川県", "arena": "いしかわ", "t": "", "id": "507604", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-13", "w": "土", "opp": "東京Z", "ha": "AWAY", "pref": "", "arena": "調整中", "t": "", "id": "507621", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-14", "w": "日", "opp": "東京Z", "ha": "AWAY", "pref": "", "arena": "調整中", "t": "", "id": "507622", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-20", "w": "土", "opp": "岐阜", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507651", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-21", "w": "日", "opp": "岐阜", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507652", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-24", "w": "水", "opp": "熊本", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507668", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-27", "w": "土", "opp": "FE名古屋", "ha": "AWAY", "pref": "愛知県", "arena": "クロコ", "t": "", "id": "507688", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-02-28", "w": "日", "opp": "FE名古屋", "ha": "AWAY", "pref": "愛知県", "arena": "クロコ", "t": "", "id": "507689", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-03", "w": "水", "opp": "八王子", "ha": "AWAY", "pref": "東京都", "arena": "エスアリ", "t": "", "id": "507700", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-05", "w": "金", "opp": "金沢", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507722", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-06", "w": "土", "opp": "金沢", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507723", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-13", "w": "土", "opp": "青森", "ha": "AWAY", "pref": "青森県", "arena": "マエダ", "t": "", "id": "507732", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-14", "w": "日", "opp": "青森", "ha": "AWAY", "pref": "青森県", "arena": "マエダ", "t": "", "id": "507733", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-17", "w": "水", "opp": "熊本", "ha": "AWAY", "pref": "熊本県", "arena": "熊本県総", "t": "", "id": "507766", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-20", "w": "土", "opp": "立川", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507775", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-21", "w": "日", "opp": "立川", "ha": "HOME", "pref": "福井県", "arena": "福井県営", "t": "", "id": "507776", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-27", "w": "土", "opp": "横浜EX", "ha": "AWAY", "pref": "神奈川県", "arena": "横浜BT", "t": "", "id": "507799", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-03-28", "w": "日", "opp": "横浜EX", "ha": "AWAY", "pref": "神奈川県", "arena": "横浜BT", "t": "", "id": "507800", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-03", "w": "土", "opp": "新潟", "ha": "HOME", "pref": "", "arena": "調整中", "t": "", "id": "507825", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-04", "w": "日", "opp": "新潟", "ha": "HOME", "pref": "", "arena": "調整中", "t": "", "id": "507826", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-10", "w": "土", "opp": "越谷", "ha": "HOME", "pref": "", "arena": "調整中", "t": "", "id": "507849", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-11", "w": "日", "opp": "越谷", "ha": "HOME", "pref": "", "arena": "調整中", "t": "", "id": "507850", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-24", "w": "土", "opp": "愛媛", "ha": "HOME", "pref": "", "arena": "調整中", "t": "", "id": "507901", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}, {"d": "2027-04-25", "w": "日", "opp": "愛媛", "ha": "HOME", "pref": "", "arena": "調整中", "t": "", "id": "507902", "k": "", "ev": "", "sc": "", "r": "", "rn": ""}]}};
+const JP=[{"d": "2026-08-27", "w": "木", "cat": "W杯予選 Window4", "opp": "サウジアラビア", "ha": "AWAY", "venue": "ジッダ（サウジアラビア）", "t": "深夜2:00頃", "tv": "テレビ朝日 / ABEMA・DAZN・TVer", "note": "", "sc": "106-78", "r": "W", "k": "", "ev": "", "rn": ""}, {"d": "2026-08-31", "w": "月", "cat": "W杯予選 Window4", "opp": "カタール", "ha": "HOME", "venue": "TOYOTA ARENA TOKYO（東京・青海）", "t": "19:10", "tv": "日本テレビ / DAZN・TVer", "note": "八村30点・12人全員得点", "sc": "123-70", "r": "W", "k": "", "ev": "", "rn": ""}, {"d": "2026-09-10", "w": "木", "cat": "アジア大会 予選R", "opp": "インドネシア", "ha": "HOME", "venue": "IGアリーナ（愛知国際アリーナ）", "t": "19:00", "tv": "TBS系", "note": "グループA", "sc": "98-53", "r": "W", "k": "", "ev": "", "rn": ""}, {"d": "2026-09-11", "w": "金", "cat": "アジア大会 予選R", "opp": "サウジアラビア", "ha": "HOME", "venue": "IGアリーナ（愛知国際アリーナ）", "t": "19:00", "tv": "TBS系", "note": "グループA", "sc": "86-80", "r": "W", "k": "", "ev": "", "rn": ""}, {"d": "2026-09-13", "w": "日", "cat": "アジア大会 予選R", "opp": "韓国", "ha": "HOME", "venue": "IGアリーナ（愛知国際アリーナ）", "t": "19:00", "tv": "TBS系", "note": "グループA2位で決勝トーナメントへ", "sc": "83-100", "r": "L", "k": "", "ev": "", "rn": ""}, {"d": "2026-09-16", "w": "水", "cat": "アジア大会 準々決勝", "opp": "チャイニーズ・タイペイ", "ha": "HOME", "venue": "IGアリーナ（愛知国際アリーナ）", "t": "", "tv": "TBS系", "note": "3大会ぶりのベスト4", "sc": "85-78", "r": "W", "k": "", "ev": "", "rn": ""}, {"d": "2026-09-18", "w": "金", "cat": "アジア大会 準決勝", "opp": "中国", "ha": "HOME", "venue": "IGアリーナ（愛知国際アリーナ）", "t": "19:20", "tv": "TBS系", "note": "64年ぶりの決勝進出・銀メダル以上確定", "sc": "97-78", "r": "W", "k": "", "ev": "", "rn": ""}, {"d": "2026-09-20", "w": "日", "cat": "アジア大会 決勝", "opp": "韓国", "ha": "HOME", "venue": "IGアリーナ（愛知国際アリーナ）", "t": "19:40", "tv": "TBS系", "note": "初の金メダルをかけて予選Rの雪辱戦", "sc": "", "r": "", "k": "", "ev": "", "rn": ""}, {"d": "2026-11-26", "w": "木", "cat": "W杯予選 Window5", "opp": "レバノン", "ha": "AWAY", "venue": "未定（レバノン）", "t": "未定", "tv": "未発表", "note": "", "sc": "", "r": "", "k": "", "ev": "", "rn": ""}, {"d": "2026-11-29", "w": "日", "cat": "W杯予選 Window5", "opp": "カタール", "ha": "AWAY", "venue": "未定（カタール）", "t": "未定", "tv": "未発表", "note": "", "sc": "", "r": "", "k": "", "ev": "", "rn": ""}, {"d": "2027-02-26", "w": "金", "cat": "W杯予選 Window6", "opp": "サウジアラビア", "ha": "HOME", "venue": "未定（日本国内）", "t": "未定", "tv": "未発表", "note": "", "sc": "", "r": "", "k": "", "ev": "", "rn": ""}, {"d": "2027-03-01", "w": "月", "cat": "W杯予選 Window6", "opp": "レバノン", "ha": "HOME", "venue": "未定（日本国内）", "t": "未定", "tv": "未発表", "note": "", "sc": "", "r": "", "k": "", "ev": "", "rn": ""}];(function(){
+  const root=document.documentElement, btn=document.getElementById('theme'),
+        meta=document.querySelector('meta[name="theme-color"]');
+  let saved=null; try{saved=localStorage.getItem('theme');}catch(e){}
+  function apply(t){
+    if(t==='dark') root.setAttribute('data-theme','dark');
+    else root.removeAttribute('data-theme');
+    btn.textContent = t==='dark' ? '☀️' : '🌙';
+    if(meta) meta.setAttribute('content', t==='dark' ? '#0e1116' : '#f5f3f6');
+  }
+  apply(saved==='dark'?'dark':'light');
+  btn.onclick=function(){
+    const next = root.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+    apply(next); try{localStorage.setItem('theme',next);}catch(e){}
+  };
+})();
+const GOKEY='going';
+let GOING;
+try{ const raw=localStorage.getItem(GOKEY); GOING=new Set(raw?JSON.parse(raw):null); }catch(e){ GOING=new Set(); }
+function saveGoing(){ try{ localStorage.setItem(GOKEY, JSON.stringify([...GOING])); }catch(e){} }
+function gkey(g){ return cur+'|'+g.d+'|'+g.opp; }
+
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+let cur = "千葉ジェッツ", filt = "all";
+const keys = Object.keys(DATA);
+const tabsEl = document.getElementById('tabs');
+
+function mkTabs(){
+  tabsEl.innerHTML = '';
+  [...keys,"日本代表"].forEach(k=>{
+    const b=document.createElement('span');
+    b.className='tab'+(k===cur?' on':'');
+    b.textContent = k==="日本代表" ? "🇯🇵 日本代表" : DATA[k].short;
+    b.style.setProperty('--tc', k==="日本代表" ? "#c8102e" : DATA[k].color);
+    b.onclick=()=>{cur=k;mkTabs();render();};
+    tabsEl.appendChild(b);
+  });
+}
+document.querySelectorAll('#filters .chip').forEach(c=>{
+  c.onclick=()=>{
+    document.querySelectorAll('#filters .chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); filt=c.dataset.f; render();
+  };
+});
+const dObj = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+const monLabel = s => { const [y,m]=s.split('-'); return y+"年"+Number(m)+"月"; };
+const esc = s => (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+function row(g, isJP){
+  const dt = dObj(g.d), past = dt < TODAY;
+  const diff = Math.round((dt-TODAY)/86400000);
+  const wc = g.w==='土'?' sat':(g.w==='日'?' sun':'');
+  const going = GOING.has(gkey(g));
+  const cls = 'g'+(past?' past':'')+(!past&&diff<=7?' soon':'')+(isJP?' jp':'')
+    +(g.k==='pre'?' pregame':'')+(going?' going':'');
+  const [,mm,dd] = g.d.split('-');
+  return `<div class="${cls}">
+    <div class="dt${wc}"><b>${Number(mm)}/${Number(dd)}</b><i>${g.w}</i></div>
+    <div class="mid">
+      ${isJP?`<div class="cat">${esc(g.cat)}</div>`:''}
+      ${g.k==='pre'?`<div class="pre">プレシーズン${g.ev?' ・ '+esc(g.ev):''}</div>`:''}
+      <div class="op">vs ${esc(g.opp)}</div>
+      <div class="vn">${esc(isJP ? g.venue : (g.arena? g.pref+' '+g.arena : g.pref))}</div>
+      ${isJP&&g.tv?`<div class="tv">📺 ${esc(g.tv)}</div>`:''}
+      ${isJP&&g.note?`<div class="nt">${esc(g.note)}</div>`:''}
+    </div>
+    <div class="rt">
+      <span class="ha ${g.ha==='HOME'?'H':(g.ha==='中立'?'N':'A')}">${g.ha==='HOME'?'H':(g.ha==='中立'?'中立':'A')}</span>
+      ${g.sc
+        ? `<div class="sc ${g.r}">${g.r==='W'?'○':(g.r==='L'?'●':'△')} ${esc(g.sc)}${g.rn?`<small>（${esc(g.rn)}）</small>`:''}</div>`
+        : `<div class="tm">${esc(g.t)||'時刻未定'}</div>`}
+    </div>
+    <button class="go${going?' on':''}" type="button" data-k="${esc(gkey(g))}"
+      aria-pressed="${going}" aria-label="行く試合にする">${going?'★':'☆'}</button>
+    </div>`;
+}
+
+function render(){
+  const isJP = cur==="日本代表";
+  let games = isJP ? JP.slice() : DATA[cur].games.slice();
+  if(filt==='HOME'||filt==='AWAY') games = games.filter(g=>g.ha===filt);
+  if(filt==='future') games = games.filter(g=>dObj(g.d)>=TODAY);
+  if(filt==='pre') games = games.filter(g=>g.k==='pre');
+  if(filt==='going') games = games.filter(g=>GOING.has(gkey(g)));
+  document.getElementById('count').textContent = games.length+"試合";
+
+  const upcoming = (isJP?JP:DATA[cur].games).filter(g=>dObj(g.d)>=TODAY)[0];
+  let html = '';
+  if(upcoming){
+    const days = Math.round((dObj(upcoming.d)-TODAY)/86400000);
+    const when = days===0?'今日':days===1?'明日':`あと${days}日`;
+    html += `<div class="next"><div class="lb">NEXT GAME ・ ${when}</div>
+      <div class="mn">${upcoming.d.replace(/-/g,'/')}（${upcoming.w}） ${isJP?'日本代表':DATA[cur].short} vs ${esc(upcoming.opp)}</div>
+      <div class="sb">${upcoming.ha==='HOME'?'ホーム':'アウェー'} ・ ${esc(isJP?upcoming.venue:(upcoming.pref+' '+upcoming.arena))} ・ ${esc(upcoming.t)||'時刻未定'}</div></div>`;
+  }
+  const rec = (list, label) => {
+    const done = list.filter(g=>g.sc);
+    if(!done.length) return '';
+    const w=done.filter(g=>g.r==='W').length, l=done.filter(g=>g.r==='L').length,
+          d=done.filter(g=>g.r==='D').length;
+    return `<span class="lb">${label}</span> <b>${w}勝${l}敗${d?d+'分':''}</b>`;
+  };
+  const all = isJP ? JP : DATA[cur].games;
+  const parts = isJP
+    ? [rec(all,'代表戦')]
+    : [rec(all.filter(g=>g.k==='pre'),'プレシーズン'), rec(all.filter(g=>g.k!=='pre'),'リーグ戦')];
+  const recHtml = parts.filter(Boolean).join(' &nbsp;/&nbsp; ');
+  if(recHtml) html += `<div class="rec">${recHtml}</div>`;
+
+  let lastM='';
+  games.forEach(g=>{
+    const m=g.d.slice(0,7);
+    if(m!==lastM){ html += `<div class="mon">${monLabel(m)}</div>`; lastM=m; }
+    html += row(g,isJP);
+  });
+  html += `<div class="note">
+    <b>視聴メモ</b><br>
+    ・千葉J（B.PREMIER）・福井（B.ONE）とも全試合 → <b>DAZN</b>（2026-27はB.PREMIER／B.ONE全試合）<br>
+    ・日本代表（FIBA主催のW杯予選）→ 地上波＋<b>DAZN・TVer</b>、アウェー戦はABEMAも<br>
+    ・アジア競技大会（愛知・名古屋）→ <b>TBS系</b>が国内放送権<br><br>
+    各試合の右端の☆を押すと「行く試合」として印が付き、この端末に記憶されます（絞り込みの「★行く」で一覧表示）。<br>\n    開幕前のプレシーズンゲームは紫のタグ付きで表示（リーグ公式の日程には載らないため、各クラブ公式の発表から収録）。ホームでもアウェーでもない中立地開催は「中立」バッジ。<br>\n    「時刻未定」はリーグ公式でティップオフ時刻が未発表の試合。
+    シーズン中に確定していくので、B.LEAGUE公式の日程ページで再確認を。<br>
+    結果更新日：2026年9月19日（プレシーズン＋日本代表のアジア大会・W杯予選）。千葉J 9/8パース戦は短縮形式のため公式スコア未掲載<br>\n    出典：B.LEAGUE公式・各クラブ公式・JBA公式</div>`;
+  document.getElementById('main').innerHTML = html;
+  window.scrollTo(0,0);
+}
+document.getElementById('main').addEventListener('click', function(e){
+  const b = e.target.closest('.go');
+  if(!b) return;
+  const k = b.dataset.k;
+  if(GOING.has(k)) GOING.delete(k); else GOING.add(k);
+  saveGoing(); render();
+});
+
+mkTabs(); render();
+</script>
+</body>
+</html>
